@@ -5,10 +5,11 @@ export default class Cart extends Component {
 
   render() {
 
-    const { cartItems, handleRemoveFromCart } = this.props
+    const { cartItems, handleRemoveFromCart, display } = this.props
+
     return (
       <div className="container">
-        <div className="shopping-cart">
+        <div className='shopping-cart' style={display}>
           <div className="shopping-cart-header">
             <i className="fa fa-shopping-cart cart-icon"></i><span className="badge">{this.props.count}</span>
             <div className="shopping-cart-total">

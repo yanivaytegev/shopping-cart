@@ -3,10 +3,11 @@ import './App.css';
 import Products from './components/Products'
 import Filter from './components/Filter';
 import Cart from './components/Cart';
-import $ from 'jquery';
+import { products } from './db.json'
+
+
 
 function App() {
-
   const [state, setState] = useState({
     products: [],
     filteredProducts: [],
@@ -14,42 +15,41 @@ function App() {
     size: '',
     sort: '',
     cartItems: [],
-    modal: false
+    display: null
   })
 
 
   useEffect(() => {
 
-    $("#btnCart").click(function () {
-      $(".shopping-cart").stop(true, false).fadeToggle('slow');
-    })
-
     if (state.load) {
       let ls = localStorage.getItem('cartItems')
-
       if (ls === null) {
         ls = '[]';
       }
-
-      fetch(`http://localhost:8000/products`)
-        .then(res => res.json())
-        .then(data => {
-          setState({
-            ...state,
-            products: data,
-            filteredProducts: data,
-            load: false,
-            cartItems: JSON.parse(ls),
-          })
-        })
-        .catch(err => err)
+      setState({
+        ...state,
+        products: products,
+        filteredProducts: products,
+        load: false,
+        cartItems: JSON.parse(ls),
+      })
     }
-  })
+  }, [state])
 
-  $("#btnCart").click(function () {
-    $(".shopping-cart").stop(true, false).fadeToggle('slow');
-  })
 
+
+  const onClickCart = (e) => {
+    e.preventDefault();
+
+    if (!state.display) state.display = { display: 'block' }
+    else state.display = null
+
+    setState({
+      ...state,
+      load: !state.modal
+    })
+
+  }
 
   const listProducts = () => {
     setState(state => {
@@ -119,25 +119,37 @@ function App() {
 
   return (
     <div>
-      <nav>
-        <div className="container">
-          <ul >
-            <li className="navbar-left"><a href="#1">Shopping Cart</a></li>
-            <li className="navbar-left"><a href="https://github.com/yanivaytegev/shopping-cart">Source Code</a></li>
-            <li className="navbar-left"><a href="https://protfolio-ya-cv.web.app/">My Protfolio</a></li>
-            <li className="navbar-right"><a href="#cart" id="btnCart"><i className="fa fa-shopping-cart"></i> Cart <span className="badge">{state.cartItems.length}</span></a></li>
+      <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+          <span className="navbar-toggler-icon"></span>
+        </button>
+        <a href="#home">Shopping Cart</a>
+        <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
+          <ul className="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li className="nav-item">
+              <a className='nav-link' href="https://github.com/yanivaytegev/shopping-cart">Source Code</a>
+            </li>
+            <li className="nav-item">
+              <a className='nav-link' href="https://protfolio-ya-cv.web.app/">My Protfolio</a>
+            </li>
+            <li className="nav-item active">
+            </li>
           </ul>
+          <span className="form-inline my-2 my-lg-0">
+            <a href="#cart" id="btnCart" onClick={e => onClickCart(e)}><i className="fa fa-shopping-cart"></i> Cart <span className="badge">{state.cartItems.length}</span></a>
+          </span>
         </div>
       </nav>
+      <hr />
       <div className="container">
-        <Cart count={state.cartItems.length} cartItems={state.cartItems} handleRemoveFromCart={handleRemoveFromCart} clearCart={clearCart} />
+        <Cart display={state.display} count={state.cartItems.length} cartItems={state.cartItems} handleRemoveFromCart={handleRemoveFromCart} clearCart={clearCart} />
         <div className='row'>
           <Filter count={state.filteredProducts.length} size={state.size} sort={state.sort} handleChangeSize={handleChangeSize} handleChangeSort={handleChangeSort} />
           <hr />
           <Products products={state.filteredProducts} handleAddToCart={handleAddToCart} />
         </div>
       </div>
-    </div>
+    </div >
   );
 
 }
